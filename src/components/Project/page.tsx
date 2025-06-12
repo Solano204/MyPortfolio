@@ -4,8 +4,8 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ReactLenis, useLenis } from "lenis/react";
 import { useGSAP } from "@gsap/react";
-import { usePathname} from "next/navigation";
-import { useTransitionRouter } from "next-view-transitions";
+import { redirect, usePathname} from "next/navigation";
+
 import Image from "next/image";
 import { X  } from "lucide-react";
 import PortfolioImageTemplate from "./Project.BlogImages";
@@ -35,6 +35,7 @@ import {
   fut7Technologies,
   ManagementPortfolioImagesSoccer,
 } from "./Data/WebSoccer";
+import Router from "next/router";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -137,7 +138,6 @@ const ContainerGlobal = () => {
     { scope: container }
   );
 
-  const router = useTransitionRouter();
   const pathName = usePathname();
 
   function animateTournamentStageTransition() {
@@ -157,15 +157,21 @@ const ContainerGlobal = () => {
       }
     );
   }
-
   const handleNavigation = (path: string) => (e: React.MouseEvent) => {
+    const pathName = usePathname();
+
     if (path === pathName) {
       e.preventDefault();
       return;
     }
-    router.push(path, {
-      onTransitionReady: animateTournamentStageTransition,
-    });
+
+    // For client-side navigation (if you still need it)
+    // Router.push(path, {
+    //   onTransitionReady: animateTournamentStageTransition,
+    // });
+
+    // Server-side redirect
+    redirect(path);
   };
 
   const openPortfolioModal = (projectIndex: number) => {
@@ -253,8 +259,8 @@ const ContainerGlobal = () => {
                   />
                 )}
 
-                <div className="absolute inset-0 z-20 flex flex-col justify-between  text-center">
-                  <div className="pt-8 w-full  ">
+                <div className="absolute inset-0 z-20 flex flex-col justify-between text-center">
+                  <div className="w-full pt-8 ">
                     <h2 className="font-bold text-[20px] white text drop-shadow">
                       {(() => {
                         const text = project.name;
@@ -360,7 +366,7 @@ const ContainerGlobal = () => {
                   </div>
 
                   <div className="flex justify-center pb-8">
-                    <div className="flex flex-col sm:flex-row items-center justify-center space-x-4">
+                    <div className="flex flex-col items-center justify-center space-x-4 sm:flex-row">
                       {project.images.length > 0 && (
                         <div
                           onClick={(e) => {

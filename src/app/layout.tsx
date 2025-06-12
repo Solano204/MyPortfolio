@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import StarsCanvas from "@/components/ui/StartsCanvas";
 import { Toaster } from "sonner";
-import { ViewTransitions } from "next-view-transitions";
 import NavBar from "@/components/Hero/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -22,21 +21,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <ViewTransitions>
-          <Toaster />
-          <link rel="icon" href="/favicon.ico" sizes="any" />
+        <Toaster />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
 
-          <body className={inter.className}>
-            {/* Stars Canvas - Background Layer */}
-            <StarsCanvas />
+        <body className={inter.className}>
+          {/* Stars Canvas - Background Layer */}
+          <StarsCanvas />
 
-            {/* Main Content */}
-            <div className="relative z-20">
-              <NavBar />
-              {children}
-            </div>
-          </body>
-        </ViewTransitions>
+          {/* Main Content */}
+          <div className="relative z-20">
+            <NavBar />
+            {children}
+          </div>
+        </body>
       </ThemeProvider>
     </html>
   );
