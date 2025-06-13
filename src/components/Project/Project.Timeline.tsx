@@ -225,7 +225,7 @@ const TimelineItem = memo<TimelineItemProps>(({
         <div className={`text-${isLeft ? "left" : "right"} relative z-10`}>
           <div className="flex items-center gap-4 mb-6">
             <h3
-              className="lg:text-4xl text-[18px] md:text-2xl font-black"
+              className="lg:text-4xl text-[14px] md:text-2xl font-black"
               style={{
                 color: tech.color,
                 textShadow: `0 0 30px ${tech.color}80, 0 0 60px ${tech.color}40, 0 0 90px ${tech.color}20`,
@@ -235,7 +235,7 @@ const TimelineItem = memo<TimelineItemProps>(({
             </h3>
           </div>
           <p
-            className="md:text-lg text-sm font-medium leading-relaxed text-gray-100"
+            className="text-sm font-medium leading-relaxed text-gray-100 md:text-lg"
             style={{
               opacity: isVisible ? 1 : 0,
               transform: isVisible ? "translateY(0)" : "translateY(40px)",
@@ -251,10 +251,10 @@ const TimelineItem = memo<TimelineItemProps>(({
 
     {/* Cosmic Icon Circle */}
     <div
-      className="absolute z-20 flex items-center justify-center w-12 h-12 md:w-24 md:h-24 transform -translate-x-1/2 border-4 rounded-full shadow-2xl border-gray-950 left-1/2"
+      className="absolute z-20 flex items-center justify-center w-12 h-12 transform -translate-x-1/2 border-4 rounded-full shadow-2xl md:w-24 md:h-24 border-gray-950 left-1/2"
       style={getIconStyles(tech, isVisible, animationDelay + 200)}
     >
-      <div className="text-2xl drop-shadow-xl text-white">
+      <div className="text-2xl text-white drop-shadow-xl">
         {tech.icon}
       </div>
 
@@ -423,7 +423,7 @@ const TechnologyTimelineModal: FC<TechnologyTimelineModalProps> = memo(({
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-black/95 backdrop-blur-md cursor-pointer"
+          className="absolute inset-0 cursor-pointer bg-black/95 backdrop-blur-md"
           onClick={handleBackdropClick}
           style={{
             background: "radial-gradient(ellipse at center, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.95) 100%)",
@@ -432,7 +432,7 @@ const TechnologyTimelineModal: FC<TechnologyTimelineModalProps> = memo(({
 
         {/* Modal Content */}
         <div
-          className="relative w-full h-full overflow-hidden transition-all ease-out border-2  bg-gradient-to-br from-gray-950 via-slate-900/80 to-gray-950 border-cyan-400/40"
+          className="relative w-full h-full overflow-hidden transition-all ease-out border-2 bg-gradient-to-br from-gray-950 via-slate-900/80 to-gray-950 border-cyan-400/40"
           style={{
             transform: modalMounted ? "translateY(0) scale(1)" : "translateY(80px) scale(0.9)",
             opacity: modalMounted ? 1 : 0,
