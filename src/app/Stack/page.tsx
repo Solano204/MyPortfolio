@@ -9,10 +9,10 @@ import {
 } from "@/components/Stack/Stack.Data";
 import { BentoTilt } from "@/components/Common/Common.card3D";
 import Image from "next/image";
-import { FuzzyText } from "@/components/Project";
 import { useApp } from "@/context/AppContext";
 import { stack } from "@/components/Stack/Stack.Page";
 import { TextGenerateEffect } from "@/components/Common/Common.Parrafe";
+import { FuzzyText } from "@/components/Common/Common.Titile";
 
 // ─── Section Card ─────────────────────────────────────────────────────────────
 
