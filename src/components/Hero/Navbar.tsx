@@ -12,12 +12,12 @@ import {
 } from "react";
 import { useWindowScroll } from "react-use";
 import clsx from "clsx";
-import { SpotlightCard } from "../Common";
+import { SpotlightCard } from "@/components/Common/Common.cardCursor";
 import { Moon, Sun } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 
 const FuzzyText = lazy(() =>
-  import("../Common").then((module) => ({ default: module.FuzzyText }))
+  import("@/components/Common/Common.Titile").then((module) => ({ default: module.FuzzyText }))
 );
 
 // ─── Types ────────────────────────────────────────────────────────────────────

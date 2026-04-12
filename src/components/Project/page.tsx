@@ -4,7 +4,6 @@ import Image from "next/image";
 import { X } from "lucide-react";
 import PortfolioImageTemplate from "./Project.BlogImages";
 import TechnologyTimelineModal from "./Project.Timeline";
-import { FuzzyText, BentoTilt } from "../Common";
 import { FcBiotech } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { FaPhotoFilm } from "react-icons/fa6";
@@ -21,6 +20,8 @@ import { brainTrustTechnologies, brainTrustImages } from "./Data/BrainTrust";
 import { cloudMartTechnologies, cloudMartImages } from "./Data/CloudMart";
 import { neoBankTechnologies, neoBankImages } from "./Data/NeoBank";
 import { tradeFlowTechnologies, tradeFlowImages } from "./Data/TradeFlow";
+import { FuzzyText } from "../Common/Common.Titile";
+import { BentoTilt } from "../Common/Common.card3D";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

@@ -7,11 +7,12 @@ import {
   stacksDevOps,
   stacksFrontend,
 } from "@/components/Stack/Stack.Data";
-import { BentoTilt, TextGenerateEffect } from "@/components/Common";
+import { BentoTilt } from "@/components/Common/Common.card3D";
 import Image from "next/image";
 import { FuzzyText } from "@/components/Project";
 import { useApp } from "@/context/AppContext";
 import { stack } from "@/components/Stack/Stack.Page";
+import { TextGenerateEffect } from "@/components/Common/Common.Parrafe";
 
 // ─── Section Card ─────────────────────────────────────────────────────────────
 

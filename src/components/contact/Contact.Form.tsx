@@ -1,8 +1,9 @@
 "use client";
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { SendHorizonal } from "lucide-react";
-import { BentoTilt, FormInput } from "../Common";
 import { useApp } from "@/context/AppContext";
+import { FormInput } from "@/components/Common/Common.Input";
+import { BentoTilt } from "@/components/Common/Common.card3D";
 
 export type EmailMessage = {
   email: string;
