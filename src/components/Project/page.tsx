@@ -20,8 +20,8 @@ import { brainTrustTechnologies, brainTrustImages } from "./Data/BrainTrust";
 import { cloudMartTechnologies, cloudMartImages } from "./Data/CloudMart";
 import { neoBankTechnologies, neoBankImages } from "./Data/NeoBank";
 import { tradeFlowTechnologies, tradeFlowImages } from "./Data/TradeFlow";
-import { FuzzyText } from "../Common/Common.Titile";
-import { BentoTilt } from "../Common/Common.card3D";
+import { FuzzyText } from "@/components/Common/Common.Titile";
+import { BentoTilt } from "@/components/Common/Common.card3D";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

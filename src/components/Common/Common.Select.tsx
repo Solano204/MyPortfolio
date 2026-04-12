@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import clsx from "clsx";
 import Image from "next/image";
-import { inputBaseStyles, labelStyles, scrollContainer } from "./Common.FormStyles";
+import { inputBaseStyles, labelStyles, scrollContainer } from "@/components/Common/Common.FormStyles";
 
 export interface SelectOption<T> {
   label: string;

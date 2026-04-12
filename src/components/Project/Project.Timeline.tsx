@@ -12,8 +12,8 @@ import React, {
 } from "react";
 import type { FC, CSSProperties } from "react";
 import { Technology, Lang } from "./page";
-import { TextGenerateEffect } from "../Common/Common.Parrafe";
-import { BentoTilt } from "../Common/Common.card3D";
+import { TextGenerateEffect } from "@/components/Common/Common.Parrafe";
+import { BentoTilt } from "@/components/Common/Common.card3D";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

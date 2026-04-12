@@ -1,7 +1,7 @@
 "use client";
 
 import React, { forwardRef, useEffect, useState } from 'react';
-import { formStyles, inputBaseStyles } from './Common.FormStyles';
+import { formStyles, inputBaseStyles } from '@/components/Common/Common.FormStyles';
 import clsx from 'clsx';
 
 export const FormInput = forwardRef<HTMLInputElement, {
