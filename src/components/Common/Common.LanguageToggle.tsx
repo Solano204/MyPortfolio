@@ -79,7 +79,7 @@ const Page = () => {
         <p className="text-xs sm:text-sm font-medium tracking-widest">{t.scrollDown}</p>
         <FaArrowDown className="w-4 h-4 sm:w-5 sm:h-5 animate-bounce" />
       </div>
-      <ContainerGlobal lang={lang} />
+      <ContainerGlobal  />
     </div>
   );
 };
