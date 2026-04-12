@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -12,6 +12,7 @@
     "@gsap/react": "^2.1.2",
     "@react-three/drei": "^10.0.0",
     "@react-three/fiber": "^9.0.4",
+    "@tailwindcss/postcss": "^4.0.7",
     "clsx": "^2.1.1",
     "framer-motion": "^12.16.0",
     "gsap": "^3.13.0",
@@ -34,7 +35,6 @@
     "@types/node": "24.0.1",
     "@types/react": "^19",
     "@types/three": "^0.173.0",
-    "cross-env": "^7.0.3",
     "eslint": "^10.2.0",
     "eslint-config-next": "^16.2.3",
     "typescript": "5.8.3"
