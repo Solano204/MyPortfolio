@@ -12,6 +12,7 @@ import React, {
 } from "react";
 import type { FC, CSSProperties } from "react";
 import { Technology, Lang } from "./page";
+import { BentoTilt, TextGenerateEffect } from "../Common";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,18 +41,7 @@ interface StarProps {
 
 // ─── Lazy loaded ─────────────────────────────────────────────────────────────
 
-// ✅ AFTER
-const BentoTilt = lazy(() =>
-  import("@/components/Common")
-    .then((m) => ({ default: m.BentoTilt }))
-    .catch(() => ({ default: ({ children, className, style }: any) => <div className={className} style={style}>{children}</div> }))
-);
 
-const TextGenerateEffect = lazy(() =>
-  import("@/components/Common")
-    .then((m) => ({ default: m.TextGenerateEffect }))
-    .catch(() => ({ default: ({ words }: { words: string }) => <h1 className="text-5xl font-black text-transparent bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 bg-clip-text">{words}</h1> }))
-);
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
