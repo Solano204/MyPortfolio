@@ -17,463 +17,406 @@ import {
   FaEnvelope,
   FaWhatsapp,
 } from "react-icons/fa";
+import { useApp } from "@/context/AppContext";
 
-// Lazy loading de componentes para mejor rendimiento
+// ────────────────────────────────────────────────────────────────────────────
+// ERROR BOUNDARY FOR THREE.JS ISSUES
+// ────────────────────────────────────────────────────────────────────────────
+
+interface ProfileCardErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+interface ProfileCardErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+class ProfileCardErrorBoundary extends React.Component<
+  ProfileCardErrorBoundaryProps,
+  ProfileCardErrorBoundaryState
+> {
+  constructor(props: ProfileCardErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ProfileCardErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("ProfileCard Three.js Error:", error);
+    console.error("Error Info:", errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="w-60 sm:w-72 md:w-80 p-6 rounded-xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-sm">
+          <p className="text-sm text-amber-400 font-medium">
+            ⚠️ Profile card loading...
+          </p>
+          <p className="text-xs text-amber-300/70 mt-2">
+            Check your browser console for details
+          </p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// LAZY LOAD WITH DELAY FOR THREE.JS INITIALIZATION
+// ────────────────────────────────────────────────────────────────────────────
+
 const ProfileCard = lazy(() =>
-  import("@/components/Hero").then((module) => ({
-    default: module.ProfileCard,
-  }))
+  new Promise<{ default: React.ComponentType<any> }>((resolve) => {
+    setTimeout(() => {
+      resolve(
+        import("@/components/Hero").then((module) => ({
+          default: module.ProfileCard,
+        }))
+      );
+    }, 800);
+  })
 );
 
-// Tipos TypeScript
-interface EnlaceSocial {
+// ────────────────────────────────────────────────────────────────────────────
+// TYPES
+// ────────────────────────────────────────────────────────────────────────────
+
+interface SocialLink {
   readonly id: string;
   readonly icon: React.ComponentType<{ className?: string }>;
   readonly url: string;
   readonly label: string;
-  readonly spotlightColor?: string;
-  readonly copyValue?: string; // Valor a copiar
-  readonly copyLabel?: string; // Etiqueta para mostrar en la alerta
+  readonly copyValue?: string;
+  readonly copyLabelKey?: string;
 }
 
-interface Habilidad {
+interface Skill {
   readonly id: string;
-  readonly nombre: string;
+  readonly translationKey: string;
 }
 
-interface DatosPerfil {
-  readonly nombre: string;
-  readonly titulo: string;
-  readonly subtitulo: string;
-  readonly handle: string;
-  readonly avatarUrl: string;
-  readonly descripcion: string;
-  readonly cvUrl?: string;
-}
+// ────────────────────────────────────────────────────────────────────────────
+// CONSTANTS
+// ────────────────────────────────────────────────────────────────────────────
 
-// Constantes - fuera del componente para evitar recreación
-const ENLACES_SOCIALES: readonly EnlaceSocial[] = [
+const SOCIAL_LINKS: readonly SocialLink[] = [
   {
     id: "linkedin",
     icon: FaLinkedin,
     url: "https://www.linkedin.com/in/carlos-josue-lopez-solano98/",
-    label: "Perfil de LinkedIn",
-    spotlightColor:
-      "rgba(0, 119, 181, 0.4)" as `rgba(${number}, ${number}, ${number}, ${number})`,
+    label: "LinkedIn",
   },
   {
     id: "github",
     icon: FaGithub,
     url: "https://github.com/Solano204",
-    label: "Perfil de GitHub",
-    spotlightColor:
-      "rgba(88, 96, 105, 0.4)" as `rgba(${number}, ${number}, ${number}, ${number})`,
+    label: "GitHub",
   },
   {
     id: "email",
     icon: FaEnvelope,
     url: "mailto:carlosjosuelopezsolano98@gmail.com",
-    label: "Copiar correo electrónico",
-    spotlightColor:
-      "rgba(220, 53, 69, 0.4)" as `rgba(${number}, ${number}, ${number}, ${number})`,
+    label: "Email",
     copyValue: "carlosjosuelopezsolano98@gmail.com",
-    copyLabel: "Email",
+    copyLabelKey: "Email",
   },
   {
     id: "whatsapp",
     icon: FaWhatsapp,
     url: "https://wa.me/529631585303",
-    label: "Copiar número de WhatsApp",
-    spotlightColor:
-      "rgba(37, 211, 102, 0.4)" as `rgba(${number}, ${number}, ${number}, ${number})`,
+    label: "WhatsApp",
     copyValue: "+52 963 158 5303",
-    copyLabel: "WhatsApp",
+    copyLabelKey: "WhatsApp",
   },
   {
     id: "instagram",
     icon: FaInstagram,
     url: "https://www.instagram.com/aapiofhope/",
-    label: "Copiar Instagram",
-    spotlightColor:
-      "rgba(225, 48, 108, 0.4)" as `rgba(${number}, ${number}, ${number}, ${number})`,
+    label: "Instagram",
     copyValue: "aapiofhope",
-    copyLabel: "Instagram",
+    copyLabelKey: "Instagram",
   },
 ] as const;
 
-const HABILIDADES: readonly Habilidad[] = [
-  { id: "respeto", nombre: "RESPETO" },
-  { id: "paciencia", nombre: "PACIENCIA" },
-  { id: "disciplina", nombre: "DISCIPLINA" },
-  { id: "comunicacion", nombre: "COMUNICACIÓN" },
+const SKILLS: readonly Skill[] = [
+  { id: "respect", translationKey: "profile.skills.respect" },
+  { id: "patience", translationKey: "profile.skills.patience" },
+  { id: "discipline", translationKey: "profile.skills.discipline" },
+  { id: "communication", translationKey: "profile.skills.communication" },
 ] as const;
 
-const DATOS_PERFIL: DatosPerfil = {
-  nombre: "JOSUÉ",
-  titulo: "DESARROLLADOR  FULLSTACK",
-  subtitulo: "SOY JOSUÉ",
-  handle: "josue_dev",
-  avatarUrl: "/Images/Profile/profile.png",
-  descripcion:
-    "Especializado en Spring Boot y React. Experiencia comprobada creando aplicaciones escalables y optimizando rendimiento de sistemas. Experto en arquitecturas de microservicios, event-driven y tecnologías frontend.",
-  cvUrl: "/documents/cv-josue-developer.pdf",
+const CV_URLS = {
+  es: "/CV_ESPAÑOL.pdf",
+  en: "/CV_ENGLISH.pdf",
 } as const;
 
-// Componente para la alerta de copiado
+// ────────────────────────────────────────────────────────────────────────────
+// SUB-COMPONENTS
+// ────────────────────────────────────────────────────────────────────────────
+
 const CopyAlert = memo<{ message: string; isVisible: boolean }>(
   ({ message, isVisible }) => (
     <div
-      className={`
-      fixed top-4 right-4 z-50 flex items-center gap-3 px-6 py-3
-      bg-gradient-to-r from-green-500 to-emerald-500
-      text-white rounded-lg shadow-2xl
-      transform transition-all duration-500 ease-out
-      ${
+      className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg shadow-2xl transform transition-all duration-500 ease-out ${
         isVisible
           ? "translate-x-0 opacity-100 scale-100"
           : "translate-x-full opacity-0 scale-95"
-      }
-    `}
+      }`}
     >
-      <Check className="w-5 h-5 text-white" />
-      <span className="font-medium">{message} copied!</span>
+      <Check className="w-4 h-4" />
+      <span className="text-sm font-medium">{message} copied!</span>
     </div>
   )
 );
-
 CopyAlert.displayName = "CopyAlert";
 
-// Componente de loading
 const LoadingScreen = memo(() => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
     <div className="space-y-8 text-center">
-      {/* Logo/Avatar animado */}
       <div className="relative">
         <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-purple-600 animate-pulse">
           <div className="absolute flex items-center justify-center bg-gray-800 rounded-full inset-2">
             <span className="text-2xl font-bold text-white">J</span>
           </div>
         </div>
-        <div className="absolute rounded-full -inset-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 animate-ping"></div>
+        <div className="absolute rounded-full -inset-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 animate-ping" />
       </div>
-
-      {/* Texto de loading */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-white">Cargando Portfolio</h2>
+        <h2 className="text-2xl font-bold text-white">Loading Portfolio</h2>
         <div className="flex items-center justify-center gap-2">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
           <div
             className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
             style={{ animationDelay: "0.1s" }}
-          ></div>
+          />
           <div
             className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce"
             style={{ animationDelay: "0.2s" }}
-          ></div>
+          />
         </div>
       </div>
-
-      {/* Barra de progreso */}
-      <div className="w-64 h-1 overflow-hidden bg-gray-700 rounded-full">
-        <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse"></div>
+      <div className="w-64 h-1 overflow-hidden bg-gray-700 rounded-full mx-auto">
+        <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse" />
       </div>
     </div>
   </div>
 ));
-
 LoadingScreen.displayName = "LoadingScreen";
 
-// Componente memoizado para botón de descarga CV
-// Componente memoizado para botón de descarga CV
+const CVDownloadButtons = memo(() => {
+  const { t } = useApp();
 
-const convertirGoogleDriveUrl = (url: string): string => {
-  // Extraer el ID del archivo de la URL de Google Drive
-  const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (match && match[1]) {
-    const fileId = match[1];
-    // Convertir a URL de descarga directa
-    return `https://drive.google.com/uc?export=download&id=${fileId}`;
-  }
-  // Si no es una URL de Google Drive válida, devolver la URL original
-  return url;
-};
+  const handleDownload = useCallback((url: string, filename: string) => {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }, []);
 
-// Componente memoizado para botón de descarga CV
-const BotonDescargarCV = memo<{ cvUrl?: string }>(({ cvUrl }) => {
-  const manejarDescarga = useCallback(() => {
-    if (cvUrl) {
-      // Convertir la URL de Google Drive si es necesario
-      const urlDescarga = convertirGoogleDriveUrl(cvUrl);
+  const buttonBaseStyles =
+    "relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl border transition-all duration-300 transform hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500/70 overflow-hidden group";
 
-      // Crear un elemento <a> temporal para forzar la descarga
-      const enlaceDescarga = document.createElement("a");
-      enlaceDescarga.href = urlDescarga;
-      enlaceDescarga.download = "CV.pdf"; // Nombre del archivo al descargar
-      enlaceDescarga.style.display = "none";
-
-      // Agregar al DOM, hacer clic y remover
-      document.body.appendChild(enlaceDescarga);
-      enlaceDescarga.click();
-      document.body.removeChild(enlaceDescarga);
-    } else {
-      console.log("URL del CV no disponible");
-    }
-  }, [cvUrl]);
+  const darkBtnStyles =
+    "bg-gradient-to-br from-gray-800 to-gray-900 dark:from-gray-700 dark:to-gray-800 light:from-gray-100 light:to-gray-200 border-gray-700 dark:border-gray-600 light:border-gray-300 text-gray-200 dark:text-gray-200 light:text-gray-700 hover:text-white dark:hover:text-white light:hover:text-gray-900 shadow-lg";
 
   return (
-    <button
-      // onClick={manejarDescarga}
-      className={`
-        relative flex items-center gap-3 px-4 py-2.5 sm:px-6 sm:py-3
-        text-white transition-all duration-300 rounded-xl
-        bg-gradient-to-br from-gray-800 to-gray-900
-        border border-gray-700 hover:border-blue-500
-        shadow-lg hover:shadow-blue-500/20
-        transform hover:scale-[1.02] active:scale-95
-        focus:outline-none focus:ring-2 focus:ring-blue-500/70
-        overflow-hidden group
-        text-sm sm:text-base
-        w-full sm:w-auto justify-center sm:justify-start
-      `}
-      aria-label="Descargar CV"
-    >
-      {/* Glow effect */}
-      <span className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 group-hover:opacity-100" />
-
-      {/* Main content */}
-      <a
-        href={"/CV.pdf"}
-        download={"CV"}
-        className="z-10 font-medium text-gray-200 group-hover:text-white"
+    <div className="flex flex-wrap gap-3">
+      <button
+        onClick={() => handleDownload(CV_URLS.es, "CV_Josue_ES.pdf")}
+        className={`${buttonBaseStyles} ${darkBtnStyles} hover:border-blue-500 hover:shadow-blue-500/20`}
+        aria-label="Download CV in Spanish"
       >
-        Descargar CV
-      </a>
-      <Download className="z-10 w-4 h-4 text-blue-400 sm:w-5 sm:h-5 group-hover:text-blue-300 group-hover:animate-pulse" />
-    </button>
-  );
-});
-// Ejemplo de uso:
-// <BotonDescargarCV cvUrl="/path/to/your/cv.pdf" fileName="Mi_CV.pdf" />
+        <span className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 group-hover:opacity-100" />
+        <Download className="z-10 w-4 h-4 text-blue-400 group-hover:text-blue-300 group-hover:animate-pulse flex-shrink-0" />
+        <span className="z-10 whitespace-nowrap">
+          {t("hero.downloadCv")} <span className="text-xs text-gray-400">(ES)</span>
+        </span>
+      </button>
 
-BotonDescargarCV.displayName = "BotonDescargarCV";
-
-// Componente memoizado para enlaces sociales
-const EnlaceSocialComponent = memo<{
-  enlace: EnlaceSocial;
-  onCopy: (value: string, label: string) => void;
-}>(({ enlace, onCopy }) => {
-  const manejarClick = useCallback(() => {
-    // Si tiene copyValue, copiar al clipboard
-    if (enlace.copyValue && enlace.copyLabel) {
-      navigator.clipboard
-        .writeText(enlace.copyValue)
-        .then(() => {
-          onCopy(enlace.copyValue!, enlace.copyLabel!);
-        })
-        .catch(() => {
-          // Fallback si falla el clipboard API
-          console.error("Error copiando al clipboard");
-          // Abrir URL como fallback
-          window.open(enlace.url, "_blank", "noopener,noreferrer");
-        });
-    } else {
-      // Para LinkedIn y GitHub, abrir en nueva pestaña
-      window.open(enlace.url, "_blank", "noopener,noreferrer");
-    }
-  }, [enlace, onCopy]);
-
-  const IconComponent = enlace.icon;
-
-  return (
-    <Suspense
-      fallback={
-        <div className="w-12 h-12 bg-gray-700 rounded-lg sm:h-12 animate-pulse" />
-      }
-    >
-      <div
-        className="relative flex items-center justify-center h-full p-2 sm:p-3 md:p-4 group"
-        onClick={manejarClick}
-        aria-label={enlace.label}
+      <button
+        onClick={() => handleDownload(CV_URLS.en, "CV_Josue_EN.pdf")}
+        className={`${buttonBaseStyles} ${darkBtnStyles} hover:border-purple-500 hover:shadow-purple-500/20`}
+        aria-label="Download CV in English"
       >
-        <IconComponent className="text-white transition-transform duration-200 w-9 h-9 group-hover:scale-110" />
-
-        {/* Tooltip para elementos que se copian */}
-        {enlace.copyValue && (
-          <div className="absolute z-10 px-2 py-1 text-xs text-white transition-opacity duration-200 transform -translate-x-1/2 bg-gray-800 rounded opacity-0 -top-12 left-1/2 group-hover:opacity-100 whitespace-nowrap">
-            Click to copy
-            <div className="absolute transform -translate-x-1/2 border-4 border-transparent top-full left-1/2 border-t-gray-800"></div>
-          </div>
-        )}
-      </div>
-    </Suspense>
-  );
-});
-
-EnlaceSocialComponent.displayName = "EnlaceSocialComponent";
-
-// Componente memoizado para habilidades
-const SeccionHabilidades = memo(() => {
-  const habilidadesJSX = useMemo(
-    () =>
-      HABILIDADES.map((habilidad) => (
-        <div
-          key={habilidad.id}
-          className="flex flex-col items-center justify-center h-full p-3 space-y-2 text-center sm:p-4"
-        >
-          <div className="text-xs font-medium tracking-wider text-gray-300 transition-colors duration-300 hover:text-white sm:text-sm md:text-base">
-            {habilidad.nombre}
-          </div>
-        </div>
-      )),
-    []
-  );
-
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6  mx-auto mt-10 sm:mt-16 md:mt-20 max-w-[95%] sm:max-w-[80%] md:max-w-[100%] md:grid-cols-4 animate-toggleAnimationTable">
-      {habilidadesJSX}
+        <span className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 group-hover:opacity-100" />
+        <Download className="z-10 w-4 h-4 text-purple-400 group-hover:text-purple-300 group-hover:animate-pulse flex-shrink-0" />
+        <span className="z-10 whitespace-nowrap">
+          {t("hero.downloadCv")} <span className="text-xs text-gray-400">(EN)</span>
+        </span>
+      </button>
     </div>
   );
 });
+CVDownloadButtons.displayName = "CVDownloadButtons";
 
-SeccionHabilidades.displayName = "SeccionHabilidades";
+const SocialLinkItem = memo<{
+  link: SocialLink;
+  onCopy: (value: string, label: string) => void;
+}>(({ link, onCopy }) => {
+  const { t } = useApp();
 
-// Componente memoizado para elementos decorativos
-const ElementosDecorativos = memo(() => (
-  <>
-    <div className="absolute w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full top-10 sm:top-20 right-10 sm:right-20 bg-cyan-400 animate-pulse" />
-    <div className="absolute w-1.5 h-1.5 sm:w-2 sm:h-2 delay-1000 bg-purple-400 rounded-full bottom-10 sm:bottom-20 left-10 sm:left-20 animate-pulse" />
-    <div className="absolute w-1 h-1 delay-500 rounded-full top-1/2 right-5 sm:right-10 bg-emerald-400 animate-ping" />
-  </>
-));
+  const handleClick = useCallback(() => {
+    if (link.copyValue && link.copyLabelKey) {
+      navigator.clipboard
+        .writeText(link.copyValue)
+        .then(() => onCopy(link.copyValue!, link.copyLabelKey!))
+        .catch(() =>
+          window.open(link.url, "_blank", "noopener,noreferrer")
+        );
+    } else {
+      window.open(link.url, "_blank", "noopener,noreferrer");
+    }
+  }, [link, onCopy]);
 
-ElementosDecorativos.displayName = "ElementosDecorativos";
+  const Icon = link.icon;
 
-// Componente principal
+  return (
+    <div
+      className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl cursor-pointer bg-gray-800/60 dark:bg-gray-700/60 light:bg-gray-100/80 border border-gray-700 dark:border-gray-600 light:border-gray-300 hover:border-blue-500/60 dark:hover:border-blue-400/60 light:hover:border-blue-500/60 hover:scale-110 transition-all duration-200 group"
+      onClick={handleClick}
+      aria-label={link.label}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && handleClick()}
+    >
+      <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 dark:text-gray-300 light:text-gray-600 group-hover:text-white dark:group-hover:text-white light:group-hover:text-gray-900 transition-colors" />
+      {link.copyValue && (
+        <div className="absolute -top-9 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-gray-800 dark:bg-gray-800 light:bg-gray-700 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+          {t("common.clickToCopy")}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+        </div>
+      )}
+    </div>
+  );
+});
+SocialLinkItem.displayName = "SocialLinkItem";
+
+const SkillsSection = memo(() => {
+  const { t } = useApp();
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-10 sm:mt-14 animate-toggleAnimationTable">
+      {SKILLS.map((skill) => (
+        <div
+          key={skill.id}
+          className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl border border-gray-700/50 dark:border-gray-600/50 light:border-gray-300/70 bg-gray-900/40 dark:bg-gray-800/40 light:bg-gray-100/60 backdrop-blur-sm"
+        >
+          <span className="text-xs sm:text-sm font-medium tracking-wider text-center text-gray-300 dark:text-gray-200 light:text-gray-700">
+            {t(skill.translationKey)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+});
+SkillsSection.displayName = "SkillsSection";
+
+// ────────────────────────────────────────────────────────────────────────────
+// MAIN COMPONENT
+// ────────────────────────────────────────────────────────────────────────────
+
 const PortfolioInterface = memo(() => {
+  const { t } = useApp();
   const [isLoading, setIsLoading] = useState(true);
   const [copyAlert, setCopyAlert] = useState({ message: "", isVisible: false });
 
-  // Simular carga de la página
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000); // 2 segundos de loading
-
+    const timer = setTimeout(() => setIsLoading(false), 4000);
     return () => clearTimeout(timer);
   }, []);
 
-  // Función para manejar el copiado
-  const manejarCopia = useCallback((value: string, label: string) => {
+  const handleCopy = useCallback((value: string, label: string) => {
     setCopyAlert({ message: label, isVisible: true });
-
-    // Ocultar la alerta después de 3 segundos
-    setTimeout(() => {
-      setCopyAlert((prev) => ({ ...prev, isVisible: false }));
-    }, 3000);
+    setTimeout(
+      () => setCopyAlert((prev) => ({ ...prev, isVisible: false })),
+      3000
+    );
   }, []);
 
-  // Memoizar la sección de enlaces sociales
-  const enlacesSocialesJSX = useMemo(
+  const socialLinksJSX = useMemo(
     () =>
-      ENLACES_SOCIALES.map((enlace) => (
-        <div
-          key={enlace.id}
-          className="flex items-center justify-center w-12 h-12 overflow-hidden transition-all duration-300 rounded-lg cursor-pointer sm:w-16 sm:h-16 md:w-20 md:h-20 hover:scale-110 focus:ring-opacity-50"
-        >
-          <EnlaceSocialComponent enlace={enlace} onCopy={manejarCopia} />
-        </div>
+      SOCIAL_LINKS.map((link) => (
+        <SocialLinkItem key={link.id} link={link} onCopy={handleCopy} />
       )),
-    [manejarCopia]
+    [handleCopy]
   );
 
-  // Callback para contacto
-  const manejarContacto = useCallback(() => {
-    console.log("Contacto clickeado");
-  }, []);
-
-  // Si está cargando, mostrar la pantalla de loading
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <>
-      {/* Alerta de copiado */}
       <CopyAlert message={copyAlert.message} isVisible={copyAlert.isVisible} />
 
-      <div className="p-4 opacity-0 sm:p-8 md:p-12 lg:p-20 animate-fadeIn">
-        <div className="max-w-[95%] sm:max-w-[90%] h-full p-4 sm:p-6 md:p-8 mx-auto animate-toggleAnimationTable relative">
-          {/* Contenido Principal */}
-          <div className="grid grid-cols-1 gap-8 mt-10 sm:gap-10 md:gap-12 sm:mt-16 md:mt-20 lg:grid-cols-2 animate-toggleAnimationTable">
-            {/* Columna Izquierda */}
-            <div className="order-2 space-y-2 sm:space-y-6 lg:order-1">
-              {/* Título Principal */}
+      <div className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 md:px-10 md:py-12 lg:px-16 lg:py-16 opacity-0 animate-fadeIn bg-transparent">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-14 mt-4 sm:mt-6">
+            {/* Left Column */}
+            <div className="order-2 lg:order-1 space-y-5 sm:space-y-6 flex flex-col justify-center">
               <div className="text-center lg:text-left">
-                <h1 className="font-mono text-lg font-bold tracking-wider sm:text-xl md:text-2xl lg:text-3xl text-zinc-400">
-                  {DATOS_PERFIL.subtitulo}
+                <h1 className="font-mono text-base sm:text-lg md:text-xl font-bold tracking-wider text-zinc-400 dark:text-zinc-400 light:text-zinc-500">
+                  {t("hero.subtitle")}
                 </h1>
-                <h2 className="mt-2 text-2xl font-bold leading-tight tracking-wider text-white sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl">
-                  {DATOS_PERFIL.titulo}
+                <h2 className="mt-2 text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold leading-tight tracking-wider text-white dark:text-white light:text-gray-900">
+                  {t("hero.title")}
                 </h2>
               </div>
 
-              {/* Sección de Información */}
-              <div className="space-y-4 sm:space-y-6">
-                <p className="text-base leading-relaxed text-center text-gray-300 sm:text-lg lg:text-left max-w-none lg:max-w-lg">
-                  {DATOS_PERFIL.descripcion}
-                </p>
-              </div>
+              <p className="text-sm sm:text-base leading-relaxed text-center lg:text-left text-gray-300 dark:text-gray-300 light:text-gray-600 max-w-lg mx-auto lg:mx-0">
+                {t("hero.description")}
+              </p>
 
-              {/* Botones y Enlaces Sociales */}
-              <div className="flex flex-col items-center gap-6 mt-6 lg:items-start sm:gap-8 animate-toggleAnimationTable sm:mt-8 md:mt-10">
-                {/* Botón Descargar CV */}
-                <BotonDescargarCV cvUrl={DATOS_PERFIL.cvUrl} />
+              <div className="flex flex-col items-center lg:items-start gap-5 sm:gap-6 mt-2">
+                <CVDownloadButtons />
 
-                {/* Enlaces Sociales */}
-                <div className="w-full ">
-                  <h3 className="mb-3 text-sm font-medium text-center text-gray-400 sm:text-base sm:mb-4 lg:text-left">
-                    Sígueme en:
+                <div className="w-full">
+                  <h3 className="mb-3 text-xs sm:text-sm font-medium text-center lg:text-left text-gray-400 dark:text-gray-400 light:text-gray-500">
+                    {t("hero.followMe")}
                   </h3>
-                  <div className="flex justify-center gap-2 lg:justify-start sm:gap-3 md:gap-4 animate-toggleAnimationTable">
-                    {enlacesSocialesJSX}
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3">
+                    {socialLinksJSX}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Columna Derecha - Foto de Perfil */}
-            <div className="flex justify-center order-1 lg:order-2 lg:justify-end animate-toggleAnimationTable">
-              <Suspense
-                fallback={
-                  <div className="w-64 bg-gray-700 h-80 sm:w-72 sm:h-90 md:w-80 md:h-96 rounded-xl animate-pulse" />
-                }
-              >
-                <div className="w-64 max-w-sm sm:w-72 md:w-80 lg:w-full">
-                  <ProfileCard
-                    name={DATOS_PERFIL.nombre}
-                    title="Ingeniero de Software"
-                    handle={DATOS_PERFIL.handle}
-                    status="En línea"
-                    contactText="Contáctame"
-                    avatarUrl={DATOS_PERFIL.avatarUrl}
-                    showUserInfo={true}
-                    enableTilt={true}
-                    onContactClick={manejarContacto}
-                  />
-                </div>
-              </Suspense>
+            {/* Right Column - Profile Card with Error Boundary */}
+            <div className="order-1 lg:order-2 flex justify-center lg:justify-end items-start">
+              <ProfileCardErrorBoundary>
+                <Suspense
+                  fallback={
+                    <div className="w-60 h-72 sm:w-72 sm:h-80 rounded-xl bg-gray-700 dark:bg-gray-700 light:bg-gray-200 animate-pulse" />
+                  }
+                >
+                  <div className="w-60 sm:w-72 md:w-80 lg:w-full max-w-xs">
+                    <ProfileCard
+                      name="JOSUÉ"
+                      title={t("hero.softwareEngineer")}
+                      handle="josue_dev"
+                      status={t("hero.online")}
+                      contactText={t("hero.contact")}
+                      avatarUrl="/Images/Profile/profile.png"
+                      showUserInfo={true}
+                      enableTilt={true}
+                    />
+                  </div>
+                </Suspense>
+              </ProfileCardErrorBoundary>
             </div>
           </div>
 
-          {/* Sección de Habilidades */}
-          <SeccionHabilidades />
-
-          {/* Elementos Decorativos */}
-          <ElementosDecorativos />
+          <SkillsSection />
         </div>
       </div>
 
-      {/* Estilos CSS adicionales */}
       <style jsx>{`
         @keyframes fadeIn {
           from {
@@ -485,7 +428,6 @@ const PortfolioInterface = memo(() => {
             transform: translateY(0);
           }
         }
-
         .animate-fadeIn {
           animation: fadeIn 0.8s ease-out forwards;
         }
@@ -495,5 +437,4 @@ const PortfolioInterface = memo(() => {
 });
 
 PortfolioInterface.displayName = "PortfolioInterface";
-
 export default PortfolioInterface;

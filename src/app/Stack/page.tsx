@@ -1,6 +1,6 @@
 "use client";
-import React, { useRef, useEffect, useState } from "react";
-import {  RollingGallery } from "@/components/Stack/index";
+import React, { useRef, useEffect, useState, memo } from "react";
+import { RollingGallery } from "@/components/Stack/index";
 import { motion } from "framer-motion";
 import {
   stacksBackend,
@@ -10,18 +10,43 @@ import {
 import { BentoTilt, TextGenerateEffect } from "@/components/Common";
 import Image from "next/image";
 import { FuzzyText } from "@/components/Project";
+import { useApp } from "@/context/AppContext";
+import { stack } from "@/components/Stack/Stack.Page";
 
+// ─── Section Card ─────────────────────────────────────────────────────────────
+
+const TechSection = memo<{
+  label: string;
+  stacks: stack[];
+  galleryKey: string;
+}>(({ label, stacks, galleryKey }) => (
+  <div className="
+    w-full max-w-4xl mx-auto
+    bg-gray-900/70 dark:bg-gray-900/70 light:bg-white/80
+    backdrop-blur-sm p-5 sm:p-8 rounded-xl
+    border border-gray-700 dark:border-gray-700 light:border-gray-200
+  ">
+    <h2 className="font-bold mb-16 sm:mb-20">
+      <FuzzyText baseIntensity={0.1} fontSize={"clamp(0.7rem, 2.5vw, 1rem)"}>
+        {label}
+      </FuzzyText>
+    </h2>
+    <RollingGallery autoplay={true} key={galleryKey} stacks={stacks} />
+  </div>
+));
+TechSection.displayName = "TechSection";
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 const Page = () => {
+  const { t, lang } = useApp();
   const [isLoading, setIsLoading] = useState(true);
   const containerRef = useRef(null);
 
   useEffect(() => {
-    // Simulate loading completion
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500); // Adjust time as needed
-
+    const timer = setTimeout(() => setIsLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -29,22 +54,13 @@ const Page = () => {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900">
         <div className="flex flex-col items-center gap-4">
-          {/* Spinner */}
-          <div className="w-12 h-12 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
-          
-          {/* Loading text with animation */}
-          <motion.p 
+          <div className="w-12 h-12 border-4 border-blue-500 rounded-full border-t-transparent animate-spin" />
+          <motion.p
             className="text-lg font-medium text-gray-100"
-            animate={{
-              opacity: [0.5, 1, 0.5],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           >
-            Loading technologies...
+            {t("stack.loading")}
           </motion.p>
         </div>
       </div>
@@ -52,37 +68,26 @@ const Page = () => {
   }
 
   return (
-    <div className="pt-20">
-      {/* Full-screen Lightning Background */}
-      <div className="absolute inset-0 -z-10">
-        {/* <Lightning
-          hue={230}
-          speed={1}
-          intensity={0.5} // Reduced intensity so content remains visible
-          size={1}
-        /> */}
-      </div>
-      
-      {/* Main content */}
-      <div className="z-50 w-[70%] mx-auto h-[50%] min-h-[20%] bg-gray-900/70 backdrop-blur-sm p-8 rounded-xl border border-gray-700 flex flex-col md:flex-row gap-5">
-        {/* Left Text Section - Estudios */}
-        <div className="" ref={containerRef} style={{ position: "relative" }}>
-          <TextGenerateEffect duration={2} filter={false} words={"Estudios"} />
-          <TextGenerateEffect
-            duration={2}
-            filter={false}
-            words={"Ingeniería en Sistemas Computacionales"}
-          />
-          <TextGenerateEffect
-            duration={2}
-            filter={false}
-            words={" Tecnológico de México - Campus Comitán Chiapas"}
-          />
+    <div className="pt-20 pb-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+      {/* Education Card — key={lang} forces remount so TextGenerateEffect replays cleanly */}
+      <div
+        key={lang}
+        className="
+          max-w-4xl mx-auto
+          bg-gray-900/70 dark:bg-gray-900/70 light:bg-white/80
+          backdrop-blur-sm p-5 sm:p-8 rounded-xl
+          border border-gray-700 dark:border-gray-700 light:border-gray-200
+          flex flex-col sm:flex-row gap-5 items-start sm:items-center
+        "
+      >
+        <div className="flex-1" ref={containerRef}>
+          <TextGenerateEffect duration={2} filter={false} words={t("stack.studies")} />
+          <TextGenerateEffect duration={2} filter={false} words={t("stack.degree")} />
+          <TextGenerateEffect duration={2} filter={false} words={t("stack.school")} />
         </div>
 
-        {/* Right Photo Section - School Logo */}
-        <div className="flex items-center justify-center flex-1">
-          <BentoTilt className="w-48 h-48 overflow-hidden border-2 rounded-xl border-cyan-500/20 bg-white/10 backdrop-blur-xs">
+        <div className="flex-shrink-0 mx-auto sm:mx-0">
+          <BentoTilt className="w-36 h-36 sm:w-48 sm:h-48 overflow-hidden border-2 rounded-xl border-cyan-500/20 bg-white/10 backdrop-blur-xs">
             <Image
               fill
               src="/Images/School/schoolTecn.png"
@@ -92,52 +97,24 @@ const Page = () => {
           </BentoTilt>
         </div>
       </div>
-      
-      {/* Technologies sections */}
-      <div className="relative flex flex-col items-center w-full h-full gap-10 mt-10">
-        <div className="w-[70%] h-[60%] bg-gray-900/70 backdrop-blur-sm p-8 rounded-xl border border-gray-700">
-          <h2 className="font-bold text-[20px] white text drop-shadow mb-20">
-            <FuzzyText
-              baseIntensity={0.1}
-              fontSize={"clamp(0.625rem, 3vw, 1rem)"}
-            >
-              {"TECHNOLOGIES BACKEND"}
-            </FuzzyText>
-          </h2>
-          <RollingGallery
-            autoplay={true}
-            key={"jkds"}
-            stacks={stacksBackend}
-          />
-        </div>
-        
-        <div className="w-[70%] bg-gray-900/70 backdrop-blur-sm p-8 rounded-xl border border-gray-700">
-          <h2 className="font-bold text-[20px] white text drop-shadow mb-20">
-            <FuzzyText
-              baseIntensity={0.1}
-              fontSize={"clamp(0.625rem, 3vw, 1rem)"}
-            >
-              {"TECHNOLOGIES FRONTEND"}
-            </FuzzyText>
-          </h2>
-          <RollingGallery
-            autoplay={true}
-            key={"ssjkds"}
-            stacks={stacksFrontend}
-          />
-        </div>
-        
-        <div className="w-[70%] h-[45%] bg-gray-900/70 backdrop-blur- p-8 rounded-xl border border-gray-700">
-          <h2 className="font-bold text-[20px] white text drop-shadow mb-20">
-            <FuzzyText
-              baseIntensity={0.1}
-              fontSize={"clamp(0.625rem, 3vw, 1rem)"}
-            >
-              {"TECHNOLOGIES DEVOPS"}
-            </FuzzyText>
-          </h2>
-          <RollingGallery autoplay={true} key={"j33kds"} stacks={stacksDevOps} />
-        </div>
+
+      {/* Technology Sections */}
+      <div className="flex flex-col items-center gap-6 sm:gap-10 mt-8 sm:mt-10">
+        <TechSection
+          label={t("stack.backend")}
+          stacks={stacksBackend}
+          galleryKey={`backend-${lang}`}
+        />
+        <TechSection
+          label={t("stack.frontend")}
+          stacks={stacksFrontend}
+          galleryKey={`frontend-${lang}`}
+        />
+        <TechSection
+          label={t("stack.devops")}
+          stacks={stacksDevOps}
+          galleryKey={`devops-${lang}`}
+        />
       </div>
     </div>
   );

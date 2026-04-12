@@ -60,7 +60,7 @@ export const FormInput = forwardRef<HTMLInputElement, {
         className={clsx(
           formStyles.label,
           formStyles.text,
-          "text-gray-700 dark:text-gray-300"
+          "text-gray-300 dark:text-gray-300"
         )}
       >
         {label}
@@ -83,7 +83,7 @@ export const FormInput = forwardRef<HTMLInputElement, {
         className={clsx(
           inputBaseStyles,
           error ? "border-red-500 dark:border-red-500" : "border-gray-300 dark:border-gray-700",
-          disabled ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400" : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100",
+          disabled ? "bg-gray-100 dark:bg-gray-800 text-gray-100 dark:text-gray-400" : "bg-gray-900 dark:bg-gray-900 text-gray-900 dark:text-gray-100",
           "focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-600",
           "placeholder-gray-400 dark:placeholder-gray-500",
           className

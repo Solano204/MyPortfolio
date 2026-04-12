@@ -260,7 +260,7 @@ const RollingGallery: React.FC<RollingGalleryProps> = ({
               }}
             >
               <div className="flex flex-col items-center justify-center w-full h-full gap-2 ">
-                <h2 className="font-bold text-[10px]">{stack.title}</h2>
+                <h2 className="text-white  font-bold text-[10px]">{stack.title}</h2>
                 <h2 className="font-bold">{stack.icon}</h2>
               </div>
 

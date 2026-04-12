@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
 
-
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -15,13 +14,15 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'user-images.githubusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'chicfkbdfqdrrevtrrby.supabase.co',
       }
     ],
-    // Optional: Configure image quality and formats
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400, // 24 hours
   },
-  // Your other Next.js config options...
 };
 
 export default nextConfig;

@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import StarsCanvas from "@/components/ui/StartsCanvas";
 import { Toaster } from "sonner";
 import NavBar from "@/components/Hero/Navbar";
+import { AppProvider } from "@/context/AppContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,22 +20,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <Toaster />
+    <html lang="en" suppressHydrationWarning>
+      <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-
-        <body className={inter.className}>
-          {/* Stars Canvas - Background Layer */}
-          <StarsCanvas />
-
-          {/* Main Content */}
-          <div className="relative z-20">
-            <NavBar />
-            {children}
-          </div>
-        </body>
-      </ThemeProvider>
+      </head>
+      <body className={inter.className}>
+        {/*
+        */}
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <AppProvider>
+            <Toaster />
+            <StarsCanvas />
+            <div className="relative z-20">
+              <NavBar />
+              {children}
+            </div>
+          </AppProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
