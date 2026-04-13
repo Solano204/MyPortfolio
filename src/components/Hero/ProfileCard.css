@@ -28,6 +28,23 @@
   --card-radius: 30px;
 }
 
+/* ✅ Increased perspective for better 3D effect */
+.pc-card-wrapper {
+  perspective: 1200px; /* Was 500px */
+  will-change: perspective;
+}
+
+/* ✅ Faster transition response */
+.pc-card {
+  transition: transform 0.8s ease; /* Was 1s */
+}
+
+/* ✅ No transition on hover for immediate feedback */
+.pc-card:hover,
+.pc-card.active {
+  transition: none; /* Instant response to mouse movement */
+}
+
 .pc-card-wrapper {
   perspective: 500px;
   transform: translate3d(0, 0, 0.1px);

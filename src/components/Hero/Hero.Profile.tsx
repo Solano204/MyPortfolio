@@ -1,304 +1,117 @@
 "use client";
-import React, { useEffect, useRef, useCallback, useMemo } from "react";
+import { useRef, useState, CSSProperties, MouseEvent } from "react";
 import Image from "next/image";
 
 interface ProfileCardProps {
   avatarUrl: string;
-  iconUrl?: string;
-  grainUrl?: string;
-  behindGradient?: string;
-  innerGradient?: string;
-  showBehindGradient?: boolean;
-  className?: string;
-  enableTilt?: boolean;
-  miniAvatarUrl?: string;
   name?: string;
   title?: string;
-  handle?: string;
-  status?: string;
-  contactText?: string;
-  showUserInfo?: boolean;
-  onContactClick?: () => void;
+  subtitle?: string;
+  className?: string;
+  tiltIntensity?: number;
+  scale?: number;
+  glowColor?: string;
+  borderColor?: string;
 }
 
-const DEFAULT_BEHIND_GRADIENT =
-  "radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y),hsla(266,100%,90%,var(--card-opacity)) 4%,hsla(266,50%,80%,calc(var(--card-opacity)*0.75)) 10%,hsla(266,25%,70%,calc(var(--card-opacity)*0.5)) 50%,hsla(266,0%,60%,0) 100%),radial-gradient(35% 52% at 55% 20%,#00ffaac4 0%,#073aff00 100%),radial-gradient(100% 100% at 50% 50%,#00c1ffff 1%,#073aff00 76%),conic-gradient(from 124deg at 50% 50%,#c137ffff 0%,#07c6ffff 40%,#07c6ffff 60%,#c137ffff 100%)";
-
-const DEFAULT_INNER_GRADIENT =
-  "linear-gradient(145deg,#60496e8c 0%,#71C4FF44 100%)";
-
-const ANIMATION_CONFIG = {
-  SMOOTH_DURATION: 600,
-  INITIAL_DURATION: 1500,
-  INITIAL_X_OFFSET: 70,
-  INITIAL_Y_OFFSET: 60,
-} as const;
-
-const clamp = (value: number, min = 0, max = 100): number =>
-  Math.min(Math.max(value, min), max);
-
-const round = (value: number, precision = 3): number =>
-  parseFloat(value.toFixed(precision));
-
-const adjust = (
-  value: number,
-  fromMin: number,
-  fromMax: number,
-  toMin: number,
-  toMax: number
-): number =>
-  round(toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin));
-
-const easeInOutCubic = (x: number): number =>
-  x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
-
-const ProfileCardComponent: React.FC<ProfileCardProps> = ({
-  avatarUrl = "<Placeholder for avatar URL>",
-  iconUrl = "<Placeholder for icon URL>",
-  grainUrl = "<Placeholder for grain URL>",
-  behindGradient,
-  innerGradient,
-  showBehindGradient = true,
-  className = "",
-  enableTilt = true,
-  miniAvatarUrl,
-  name = "Javi A. Torres",
+export const ProfileCard = ({
+  avatarUrl,
+  name = "JOSUÉ",
   title = "Software Engineer",
-  handle = "javicodes",
-  status = "Online",
-  contactText = "Contact",
-  showUserInfo = true,
-  onContactClick,
-}) => {
-  const wrapRef = useRef<HTMLDivElement>(null);
+  subtitle,
+  className = "",
+  tiltIntensity = 8,
+  scale = 0.98,
+  glowColor = "from-blue-600/20 via-purple-600/20 to-pink-600/20",
+  borderColor = "border-gray-700/30",
+}: ProfileCardProps) => {
+  const [transformStyle, setTransformStyle] = useState("");
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const animationHandlers = useMemo(() => {
-    if (!enableTilt) return null;
+  const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
 
-    let rafId: number | null = null;
+    const { left, top, width, height } = cardRef.current.getBoundingClientRect();
+    const relativeX = (event.clientX - left) / width;
+    const relativeY = (event.clientY - top) / height;
 
-    const updateCardTransform = (
-      offsetX: number,
-      offsetY: number,
-      card: HTMLElement,
-      wrap: HTMLElement
-    ) => {
-      const width = card.clientWidth;
-      const height = card.clientHeight;
+    // Store mouse position for shine effect
+    setMousePosition({ x: relativeX * 100, y: relativeY * 100 });
 
-      const percentX = clamp((100 / width) * offsetX);
-      const percentY = clamp((100 / height) * offsetY);
+    // Calculate tilt angles
+    const tiltX = (relativeY - 0.5) * tiltIntensity;
+    const tiltY = (relativeX - 0.5) * -tiltIntensity;
 
-      const centerX = percentX - 50;
-      const centerY = percentY - 50;
-
-      const properties = {
-        "--pointer-x": `${percentX}%`,
-        "--pointer-y": `${percentY}%`,
-        "--background-x": `${adjust(percentX, 0, 100, 35, 65)}%`,
-        "--background-y": `${adjust(percentY, 0, 100, 35, 65)}%`,
-        "--pointer-from-center": `${clamp(
-          Math.hypot(percentY - 50, percentX - 50) / 50,
-          0,
-          1
-        )}`,
-        "--pointer-from-top": `${percentY / 100}`,
-        "--pointer-from-left": `${percentX / 100}`,
-        "--rotate-x": `${round(-(centerX / 5))}deg`,
-        "--rotate-y": `${round(centerY / 4)}deg`,
-      };
-
-      Object.entries(properties).forEach(([property, value]) => {
-        wrap.style.setProperty(property, value);
-      });
-    };
-
-    const createSmoothAnimation = (
-      duration: number,
-      startX: number,
-      startY: number,
-      card: HTMLElement,
-      wrap: HTMLElement
-    ) => {
-      const startTime = performance.now();
-      const targetX = wrap.clientWidth / 2;
-      const targetY = wrap.clientHeight / 2;
-
-      const animationLoop = (currentTime: number) => {
-        const elapsed = currentTime - startTime;
-        const progress = clamp(elapsed / duration);
-        const easedProgress = easeInOutCubic(progress);
-
-        const currentX = adjust(easedProgress, 0, 1, startX, targetX);
-        const currentY = adjust(easedProgress, 0, 1, startY, targetY);
-
-        updateCardTransform(currentX, currentY, card, wrap);
-
-        if (progress < 1) {
-          rafId = requestAnimationFrame(animationLoop);
-        }
-      };
-
-      rafId = requestAnimationFrame(animationLoop);
-    };
-
-    return {
-      updateCardTransform,
-      createSmoothAnimation,
-      cancelAnimation: () => {
-        if (rafId) {
-          cancelAnimationFrame(rafId);
-          rafId = null;
-        }
-      },
-    };
-  }, [enableTilt]);
-
-  const handlePointerMove = useCallback(
-    (event: PointerEvent) => {
-      const card = cardRef.current;
-      const wrap = wrapRef.current;
-
-      if (!card || !wrap || !animationHandlers) return;
-
-      const rect = card.getBoundingClientRect();
-      animationHandlers.updateCardTransform(
-        event.clientX - rect.left,
-        event.clientY - rect.top,
-        card,
-        wrap
-      );
-    },
-    [animationHandlers]
-  );
-
-  const handlePointerEnter = useCallback(() => {
-    const card = cardRef.current;
-    const wrap = wrapRef.current;
-
-    if (!card || !wrap || !animationHandlers) return;
-
-    animationHandlers.cancelAnimation();
-    wrap.classList.add("active");
-    card.classList.add("active");
-  }, [animationHandlers]);
-
-  const handlePointerLeave = useCallback(
-    (event: PointerEvent) => {
-      const card = cardRef.current;
-      const wrap = wrapRef.current;
-
-      if (!card || !wrap || !animationHandlers) return;
-
-      animationHandlers.createSmoothAnimation(
-        ANIMATION_CONFIG.SMOOTH_DURATION,
-        event.offsetX,
-        event.offsetY,
-        card,
-        wrap
-      );
-      wrap.classList.remove("active");
-      card.classList.remove("active");
-    },
-    [animationHandlers]
-  );
-
-  useEffect(() => {
-    if (!enableTilt || !animationHandlers) return;
-
-    const card = cardRef.current;
-    const wrap = wrapRef.current;
-
-    if (!card || !wrap) return;
-
-    const pointerMoveHandler = handlePointerMove as EventListener;
-    const pointerEnterHandler = handlePointerEnter as EventListener;
-    const pointerLeaveHandler = handlePointerLeave as EventListener;
-
-    card.addEventListener("pointerenter", pointerEnterHandler);
-    card.addEventListener("pointermove", pointerMoveHandler);
-    card.addEventListener("pointerleave", pointerLeaveHandler);
-
-    const initialX = wrap.clientWidth - ANIMATION_CONFIG.INITIAL_X_OFFSET;
-    const initialY = ANIMATION_CONFIG.INITIAL_Y_OFFSET;
-
-    animationHandlers.updateCardTransform(initialX, initialY, card, wrap);
-    animationHandlers.createSmoothAnimation(
-      ANIMATION_CONFIG.INITIAL_DURATION,
-      initialX,
-      initialY,
-      card,
-      wrap
+    setTransformStyle(
+      `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(${scale}, ${scale}, ${scale})`
     );
+  };
 
-    return () => {
-      card.removeEventListener("pointerenter", pointerEnterHandler);
-      card.removeEventListener("pointermove", pointerMoveHandler);
-      card.removeEventListener("pointerleave", pointerLeaveHandler);
-      animationHandlers.cancelAnimation();
-    };
-  }, [
-    enableTilt,
-    animationHandlers,
-    handlePointerMove,
-    handlePointerEnter,
-    handlePointerLeave,
-  ]);
+  const handleMouseLeave = () => {
+    setTransformStyle("");
+    setMousePosition({ x: 50, y: 50 });
+  };
 
-  const cardStyle = useMemo(
-    () =>
-      ({
-        "--icon": iconUrl ? `url(${iconUrl})` : "none",
-        "--grain": grainUrl ? `url(${grainUrl})` : "none",
-        "--behind-gradient": showBehindGradient
-          ? behindGradient ?? DEFAULT_BEHIND_GRADIENT
-          : "none",
-        "--inner-gradient": innerGradient ?? DEFAULT_INNER_GRADIENT,
-      } as React.CSSProperties),
-    [iconUrl, grainUrl, showBehindGradient, behindGradient, innerGradient]
-  );
-
-  const handleContactClick = useCallback(() => {
-    onContactClick?.();
-  }, [onContactClick]);
+  const cardStyle: CSSProperties = {
+    transform: transformStyle,
+    willChange: "transform",
+    transition: transformStyle ? "none" : "transform 0.3s ease-out",
+  };
 
   return (
     <div
-      ref={wrapRef}
-      className={`pc-card-wrapper ${className}`.trim()}
+      ref={cardRef}
+      className={`relative w-full max-w-sm overflow-hidden rounded-2xl border ${borderColor} backdrop-blur-sm ${className}`}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       style={cardStyle}
     >
-      <section ref={cardRef} className="pc-card">
-        <div className="pc-inside">
-          <div className="pc-shine" />
-          <div className="pc-glare" />
-          <div className="pc-content pc-avatar-content">
-            <Image
-              fill
-              className="absolute object-cover w-full h-full opacity-70 hover:opacity-100"
-              src={avatarUrl}
-              alt={`${name || "User"} avatar`}
-              //   loading="lazy"
-              //   onError={(e) => {
-              //     const target = e.target as HTMLImageElement;
-              //     target.style.display = "none";
-              //   }}
-            />
-          </div>
+      {/* Background gradient overlay */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${glowColor} pointer-events-none z-10`} />
 
-          <div className="">
-            <div className="pc-details opacity-110">
-              <h3>{name}</h3>
-              <p>{title}</p>
-            </div>
-          </div>
+      {/* Image container */}
+      <div className="relative w-full h-full aspect-[3/4] overflow-hidden bg-gray-900">
+        <Image
+          src={avatarUrl}
+          alt={name}
+          fill
+          className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
+          priority
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        />
+      </div>
+
+      {/* Content overlay - bottom section with blur background */}
+      <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none z-20">
+        {/* Text content */}
+        <div className="space-y-2">
+          <h3 className="text-3xl sm:text-4xl font-bold text-white tracking-wider leading-tight">
+            {name}
+          </h3>
+          <p className="text-sm sm:text-base text-gray-200 font-medium tracking-widest uppercase">
+            {title}
+          </p>
+          {subtitle && (
+            <p className="text-xs sm:text-sm text-gray-400 font-light tracking-wide mt-2">
+              {subtitle}
+            </p>
+          )}
         </div>
-      </section>
+      </div>
+
+      {/* Dynamic shine effect based on mouse position */}
+      <div
+        className="absolute inset-0 pointer-events-none z-15 opacity-0 hover:opacity-100 transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%)`,
+        }}
+      />
+
+      {/* Border glow effect */}
+      <div className="absolute inset-0 rounded-2xl border border-white/10 pointer-events-none z-20 opacity-0 hover:opacity-100 transition-opacity duration-300" />
     </div>
   );
 };
-
-const ProfileCard = React.memo(ProfileCardComponent);
 
 export default ProfileCard;
