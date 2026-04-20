@@ -76,8 +76,22 @@ const MEDIA_ITEMS: readonly MediaItem[] = [
   },
   {
     id: "9",
+    type: "image",
+    src: "https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/MOMENTS_GRINGOS/WhatsApp%20Image%202026-03-18%20at%201.39.32%20PM.jpeg",
+    date: "Apr 16, 2026",
+    aspectRatio: "portrait",
+  },
+  {
+    id: "10",
     type: "video",
     src: "https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/MOMENTS_GRINGOS/WhatsApp%20Video%202026-04-11%20at%209.18.39%20AM.mp4",
+    date: "Apr 11, 2026",
+    aspectRatio: "portrait",
+  },
+  {
+    id: "11",
+    type: "video",
+    src: "https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/MOMENTS_GRINGOS/WhatsApp%20Video%202026-04-19%20at%207.50.35%20PM%20(1).mp4",
     date: "Apr 11, 2026",
     aspectRatio: "portrait",
   },
