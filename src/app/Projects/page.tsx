@@ -15,7 +15,7 @@ const LanguageToggle = memo<{
   <button
     onClick={onToggle}
     className="
-      flex items-center gap-2 px-3 py-2 rounded-lg
+      flex items-center gap-2  rounded-lg
       border border-gray-600 dark:border-gray-500
       bg-gray-800/60 dark:bg-gray-700/60
       hover:bg-gray-700 dark:hover:bg-gray-600
@@ -24,10 +24,6 @@ const LanguageToggle = memo<{
     "
     aria-label="Toggle language"
   >
-    <Globe className="w-4 h-4" />
-    <span>{lang === "es" ? "ES" : "EN"}</span>
-    <span className="text-gray-400 text-xs">→</span>
-    <span className="text-gray-400 text-xs">{lang === "es" ? "EN" : "ES"}</span>
   </button>
 ));
 LanguageToggle.displayName = "LanguageToggle";

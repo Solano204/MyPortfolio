@@ -49,6 +49,7 @@ interface MobileMenuToggleProps {
 const NAV_ITEMS: readonly NavItem[] = [
   { titleKey: "nav.projects", direction: "Projects" },
   { titleKey: "nav.stack", direction: "Stack" },
+  { titleKey: "Moments", direction: "Moments" },
   { titleKey: "nav.contact", direction: "Contact" },
 ] as const;
 

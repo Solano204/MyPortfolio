@@ -20,6 +20,9 @@ import { brainTrustTechnologies, brainTrustImages } from "./Data/BrainTrust";
 import { cloudMartTechnologies, cloudMartImages } from "./Data/CloudMart";
 import { neoBankTechnologies, neoBankImages } from "./Data/NeoBank";
 import { tradeFlowTechnologies, tradeFlowImages } from "./Data/TradeFlow";
+import { barberProTechnologies, barberProImages } from "./Data/BarberPro";
+import { pizzaManiaTechnologies, pizzomaniaImages } from "./Data/PizzaMania";
+import { xaviTechnologies, xaviImages } from "./Data/Xavi";
 import { FuzzyText } from "@/components/Common/Common.Titile";
 import { BentoTilt } from "@/components/Common/Common.card3D";
 
@@ -86,6 +89,30 @@ const buildProjects = (): Project[] => [
     images: cloudMartImages,
     technologies: cloudMartTechnologies,
     featuredImage: "/Images/Projects/e-commerce.jpg",
+  },
+  {
+    nameEs: "BarberPro — Sistema Integral de Gestión de Barberías",
+    nameEn: "BarberPro — Complete Barbershop Management System",
+    codeUrl: "https://github.com/Solano204/BARBER-PRO",
+    images: barberProImages,
+    technologies: barberProTechnologies,
+    featuredImage: "https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/sign/BARBER_ADMIN/images%20(15).jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9mYzQ3ODAwYS1mNGQyLTRlMmQtYjVmMy0yZTQ1ZjU4ZjdkYTYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCQVJCRVJfQURNSU4vaW1hZ2VzICgxNSkuanBnIiwiaWF0IjoxNzc2NjQ1ODYzLCJleHAiOjE4MDgxODE4NjN9.it5IVivmucvwQ-hKXtKMYjCA4YwUYv-hJuN0fyvtcUg",
+  },
+  {
+    nameEs: "PizzaMania — Sistema de Gestión para Pizzerías",
+    nameEn: "PizzaMania — Restaurant Management System",
+    codeUrl: "https://github.com/Solano204/PIZZERIA-MANIA-X",
+    images: pizzomaniaImages,
+    technologies: pizzaManiaTechnologies,
+    featuredImage: "https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/PIZZERIA_ADMIN/pizza.jpeg",
+  },
+  {
+    nameEs: "Xavi Comercializadora — Gestión Multi-Sucursal",
+    nameEn: "Xavi Comercializadora — Multi-Branch Management",
+    codeUrl: "https://github.com/Solano204/TORTILLERIA-XAVI",
+    images: xaviImages,
+    technologies: xaviTechnologies,
+    featuredImage: "https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/COMERZIALIZAROA/xavi.jpg",
   },
   {
     nameEs: "Sistema de administración de partidos en un torneo de fútbol",
